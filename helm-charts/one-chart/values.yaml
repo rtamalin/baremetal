@@ -1,0 +1,127 @@
+# Default values for one-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+#
+# Replicated subset of the settings from the bitnami/external-dns v6.12.1
+# under an external-dns namespace to support overriding settings as a
+# subchart; add more as needed.
+external-dns:
+  ## @param sources [array] K8s resources type to be observed for new DNS entries by ExternalDNS
+  ##
+  sources:
+    # - crd
+    - service
+    - ingress
+    # - contour-httpproxy
+
+  ## @param provider DNS provider where the DNS records will be created.
+  ## Available providers are:
+  ## - akamai, alibabacloud, aws, azure, azure-private-dns, cloudflare, coredns, designate, digitalocean, google, hetzner, infoblox, linode, rfc2136, transip, oci
+  ##
+  provider: pdns
+
+  ## PowerDNS configuration to be set via arguments/env. variables
+  ##
+  pdns:
+    ## @param pdns.apiUrl When using the PowerDNS provider, specify the API URL of the server.
+    ##
+    apiUrl: ""
+    ## @param pdns.apiPort When using the PowerDNS provider, specify the API port of the server.
+    ##
+    apiPort: "8081"
+    ## @param pdns.apiKey When using the PowerDNS provider, specify the API key of the server.
+    ##
+    apiKey: ""
+    ## @param pdns.secretName When using the PowerDNS provider, specify as secret name containing the API Key
+    ##
+    secretName: ""
+
+  ## @param domainFilters Limit possible target zones by domain suffixes (optional)
+  ##
+  domainFilters:
+    - suse.baremetal
+
+  # @param policy Modify how DNS records are synchronized between sources and providers (options: sync, upsert-only )
+  ##
+  policy: upsert-only
